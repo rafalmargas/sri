@@ -25,8 +25,6 @@ import javax.ejb.TransactionManagementType;
 @Singleton
 public class CategoryDao {
 	
-	private List<Category> categoryList = this.listAll(null, null);
-	
 	@PersistenceContext(unitName = "sri2-persistence-unit")
 	private EntityManager em;
 
@@ -41,10 +39,6 @@ public class CategoryDao {
 		}
 	}
 
-	public Category findById(Long id) {
-		return em.find(Category.class, id);
-	}
-
 	public Category update(Category entity) {
 		return em.merge(entity);
 	}
@@ -52,17 +46,11 @@ public class CategoryDao {
 @Lock(LockType.READ)
 @Schedule(second="*", minute="1", hour="*", persistent=false)
 @TransactionAttribute(TransactionAttributeType.NEVER)
-	public List<Category> listAll(Integer startPosition, Integer maxResult) {
+	public List<Category> listAll() {
 		TypedQuery<Category> findAllQuery = em
 				.createQuery(
 						"SELECT DISTINCT c FROM Category c LEFT JOIN FETCH c.parentCategory LEFT JOIN FETCH c.childCategories ORDER BY c.id",
 						Category.class);
-		if (startPosition != null) {
-			findAllQuery.setFirstResult(startPosition);
-		}
-		if (maxResult != null) {
-			findAllQuery.setMaxResults(maxResult);
-		}
 		return findAllQuery.getResultList();
 	}
 }
